@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蕎淶清飲 - 回饋好禮</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; }
+        .bg-pattern { background-image: url('https://www.transparenttextures.com/patterns/pinstriped-suit.png'); }
+    </style>
+</head>
+<body class="bg-[#fcfaf7] text-[#333] pb-20">
+    <div id="app">
+        <!-- Header -->
+        <header class="relative h-[220px] bg-[#6b1111] flex flex-col items-center justify-center overflow-hidden">
+            <div class="absolute inset-0 opacity-10 bg-pattern"></div>
+            <div class="z-10 text-center px-6">
+                <div class="inline-block border border-[#c9a063] px-6 py-1 mb-4">
+                    <p class="text-[#c9a063] text-[10px] tracking-[0.4em] uppercase font-bold">蕎淶清飲 2026</p>
+                </div>
+                <h1 class="text-5xl font-bold text-[#f2e6d0] mb-2 tracking-[0.1em]">回饋好禮</h1>
+                <p class="text-[#f2e6d0] text-[10px] tracking-[0.5em] font-light opacity-80 uppercase italic">Luxury & Taste</p>
+            </div>
+        </header>
+
+        <main class="max-w-md mx-auto px-5 -mt-8 relative z-20">
+            <div class="bg-white shadow-2xl rounded-sm">
+                <div class="p-8">
+                    <div class="flex justify-between items-end mb-8 border-b border-slate-100 pb-6">
+                        <div class="flex-1">
+                            <h2 class="text-lg font-bold text-[#1a1a1a] leading-tight">限量回饋原味鬆餅乙份</h2>
+                            <div class="flex items-center gap-1 mt-2">
+                                <i data-lucide="shield-check" class="w-3 h-3 text-[#c9a063]"></i>
+                                <p class="text-[10px] text-[#c9a063] font-bold tracking-widest uppercase">每人限領乙份</p>
+                            </div>
+                        </div>
+                        <div class="text-right ml-4">
+                            <span class="text-[10px] text-slate-300 block font-bold uppercase tracking-widest mb-1">Remainings</span>
+                            <span class="text-4xl font-light text-[#6b1111]" id="remain-count">30<span class="text-xs text-slate-300 font-normal ml-1">/ 30</span></span>
+                        </div>
+                    </div>
+
+                    <!-- 領取前介面 -->
+                    <div id="before-claim" class="space-y-6">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2 text-[#6b1111] mb-1">
+                                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                                <h3 class="text-[11px] font-bold tracking-widest uppercase">領取流程說明</h3>
+                            </div>
+                            <div class="p-4 border border-[#c9a063]/20 bg-[#fcfaf7] flex items-start gap-3 rounded-sm">
+                                <div class="w-5 h-5 rounded-full bg-[#c9a063] flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="check" class="w-3 h-3 text-white"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-xs font-bold text-black leading-relaxed">請確認已公開分享活動貼文</p>
+                                    <a href="https://www.facebook.com/share/185pmSU5n5/" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-[#6b1111] font-bold mt-1 underline">
+                                        <i data-lucide="external-link" class="w-2.5 h-2.5"></i> 前往活動貼文頁面
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button id="claim-btn" class="w-full py-5 bg-[#1a1a1a] text-[#c9a063] flex items-center justify-center gap-3 tracking-[0.3em] font-bold text-sm shadow-xl active:scale-95 transition-all">
+                            <span>領取兌換序號</span>
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <!-- 領取後介面 -->
+                    <div id="after-claim" class="hidden text-center py-2">
+                        <p class="text-[9px] text-slate-400 tracking-[0.3em] uppercase mb-3 font-bold">專屬回饋序號</p>
+                        <div id="ticket-id" class="text-3xl font-mono font-bold tracking-wider text-[#1a1a1a] border-y border-[#c9a063]/30 py-8 px-4 inline-block mb-8">
+                            ------
+                        </div>
+                        
+                        <div class="bg-[#fcfaf7] border border-[#f2e6d0] p-6 mb-8 text-left relative">
+                            <div class="absolute -top-3 left-4 bg-[#6b1111] text-white px-3 py-1 text-[9px] font-bold tracking-widest uppercase flex items-center gap-1">
+                                <i data-lucide="camera" class="w-2.5 h-2.5"></i> 請截圖保存
+                            </div>
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                領取成功！請將<span class="text-black font-bold border-b-2 border-[#c9a063]">此頁序號截圖</span>，連同您的<span class="text-black font-bold border-b-2 border-[#c9a063]">臉書分享截圖</span>，傳送至官方 LINE <span class="text-[#6b1111] font-bold underline decoration-[#c9a063]">闆娘核對</span>！
+                            </p>
+                        </div>
+
+                        <button id="line-btn" class="w-full bg-[#06C755] text-white py-5 flex items-center justify-center gap-3 font-bold shadow-lg hover:brightness-105 active:scale-95 transition-all rounded-sm">
+                            <i data-lucide="message-circle" class="w-5 h-5 fill-white"></i>
+                            <span class="tracking-widest text-sm font-bold">傳送截圖至官方 LINE</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Info -->
+            <section class="mt-8 space-y-3">
+                <div class="bg-white/60 p-4 border-l-4 border-[#c9a063] flex flex-col items-center text-center">
+                    <p class="text-[9px] text-slate-400 uppercase tracking-widest mb-1 font-bold">門市地址</p>
+                    <p class="text-[11px] text-slate-600 font-medium tracking-tight">桃園市桃園區文中二路25巷22號</p>
+                </div>
+                <div class="bg-white/60 p-4 border-l-4 border-[#6b1111] flex flex-col items-center text-center">
+                    <p class="text-[9px] text-slate-400 uppercase tracking-widest mb-1 font-bold">兌換期間</p>
+                    <p class="text-[11px] text-[#6b1111] font-bold">2026/02/23 － 03/23</p>
+                </div>
+            </section>
+
+            <footer class="text-center pt-16 pb-6">
+                <p class="text-[9px] tracking-[0.8em] uppercase text-slate-300">蕎淶清飲 ． Chillax Drink</p>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        // 初始化 Lucide 圖標
+        lucide.createIcons();
+
+        // 領取邏輯
+        const claimBtn = document.getElementById('claim-btn');
+        const beforeClaim = document.getElementById('before-claim');
+        const afterClaim = document.getElementById('after-claim');
+        const ticketIdDisplay = document.getElementById('ticket-id');
+        const remainCount = document.getElementById('remain-count');
+        const lineBtn = document.getElementById('line-btn');
+
+        // 從 LocalStorage 檢查是否領過
+        const savedTicket = localStorage.getItem('qiaolai_ticket');
+        if (savedTicket) {
+            showTicket(savedTicket);
+        }
+
+        claimBtn.addEventListener('click', () => {
+            claimBtn.innerHTML = '<span class="animate-spin">🌀</span> 處理中...';
+            claimBtn.disabled = true;
+
+            setTimeout(() => {
+                const newId = 'CHX-' + Math.random().toString(36).substr(2, 5).toUpperCase() + '-' + Math.floor(Date.now()/1000).toString().slice(-4);
+                localStorage.setItem('qiaolai_ticket', newId);
+                showTicket(newId);
+                remainCount.innerHTML = '29<span class="text-xs text-slate-300 font-normal ml-1">/ 30</span>';
+            }, 1000);
+        });
+
+        function showTicket(id) {
+            ticketIdDisplay.innerText = id;
+            beforeClaim.classList.add('hidden');
+            afterClaim.classList.remove('hidden');
+        }
+
+        lineBtn.addEventListener('click', () => {
+            // 直接使用您的官方 LINE 短網址，這是最穩定的跳轉方式
+            window.location.href = "https://lin.ee/jCQGkr1";
+        });
+    </script>
+</body>
+</html>
+
